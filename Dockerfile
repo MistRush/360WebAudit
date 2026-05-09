@@ -39,5 +39,5 @@ ENV REPORTS_DIR=/app/reports
 
 EXPOSE 8000
 
-# Shell form of CMD to allow environment variable expansion ($PORT)
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Start via python to ensure environment variables are handled correctly
+CMD ["python", "main.py"]

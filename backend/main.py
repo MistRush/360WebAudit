@@ -253,7 +253,6 @@ async def delete_audit(audit_id: int, db: AsyncSession = Depends(get_db)):
 
 if __name__ == "__main__":
     import uvicorn
-    # IMPORTANT: On Windows, reload=True spawns child processes that do NOT inherit
-    # WindowsProactorEventLoopPolicy, which breaks Playwright (NotImplementedError).
-    # Use reload=False for local dev, or use a run.py wrapper (see run.py).
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    # Railway sets the PORT environment variable
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
