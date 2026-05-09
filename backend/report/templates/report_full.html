@@ -19,7 +19,7 @@
   .issue-critical { border-left: 4px solid #ef4444; background: #fef2f2; }
   .issue-warning  { border-left: 4px solid #f59e0b; background: #fffbeb; }
   .issue-ok       { border-left: 4px solid #22c55e; background: #f0fdf4; }
-  .fix-box { background: linear-gradient(135deg, #ede9fe, #dbeafe); border-left: 4px solid #6366f1; }
+  .fix-box { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-left: 4px solid #22c55e; }
   .money-box { background: #fef3c7; border-left: 4px solid #d97706; }
   .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4,0,0.6,1) infinite; }
 </style>
@@ -191,7 +191,7 @@
           <!-- Right side: Solution -->
           <div class="flex flex-col">
             <div class="fix-box rounded-xl p-5 h-full flex flex-col justify-center">
-              <div class="mb-2 text-indigo-800 font-bold flex items-center gap-2">
+    <div class="mb-2 text-green-800 font-bold flex items-center gap-2">
                 <span class="text-lg">🚀</span> Řešení novým webem:
               </div>
               <div class="text-gray-700 leading-relaxed">{{ threat.solution or "Implementace moderního stacku s důrazem na konverze a technickou dokonalost." }}</div>
@@ -269,7 +269,7 @@
       <div class="flex flex-col">
         {% if issue.fix_proposal %}
         <div class="fix-box rounded-xl p-4 text-sm h-full flex flex-col justify-center">
-          <div class="mb-1 text-indigo-800">🚀 <strong>Řešení v rámci nového webu:</strong></div>
+          <div class="mb-1 text-green-800">🚀 <strong>Řešení v rámci nového webu:</strong></div>
           <div class="text-gray-700">{{ issue.fix_proposal }}</div>
         </div>
         {% else %}
@@ -289,7 +289,7 @@
   <!-- AI Gaps section -->
   {% if gaps %}
   <h3 class="text-xl font-bold text-gray-900 mt-12 mb-4">🧠 Obchodní příležitosti (AI analýza)</h3>
-  <div class="space-y-4 mb-10">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
     {% for gap in gaps %}
     <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
       <div class="flex items-center gap-2 mb-2">
