@@ -70,6 +70,7 @@
                             <thead class="text-slate-400 text-xs uppercase tracking-wider">
                                 <tr>
                                     <th class="pb-4">Web</th>
+                                    <th class="pb-4">Datum</th>
                                     <th class="pb-4">Skóre</th>
                                     <th class="pb-4">Stav</th>
                                     <th class="pb-4 text-right">Akce</th>
@@ -108,7 +109,12 @@
                 const data = await res.json();
                 historyBody.innerHTML = data.map(audit => `
                     <tr class="hover:bg-slate-800/30 transition-colors">
-                        <td class="py-4 font-medium">${audit.url}</td>
+                        <td class="py-4 font-medium">
+                            <div class="max-w-[200px] truncate" title="${audit.url}">${audit.url}</div>
+                        </td>
+                        <td class="py-4 text-slate-400 text-xs">
+                            ${new Date(audit.created_at).toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </td>
                         <td class="py-4">
                             <span class="font-bold ${audit.score_total > 80 ? 'text-green-400' : audit.score_total > 50 ? 'text-amber-400' : 'text-red-400'}">
                                 ${audit.score_total || '-'}
