@@ -98,10 +98,16 @@ def _audit_to_response(audit: Audit) -> AuditResponse:
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    dashboard = Path(__file__).parent.parent / "frontend" / "index.html"
-    if dashboard.exists():
-        return HTMLResponse(content=dashboard.read_text(encoding="utf-8"))
-    return HTMLResponse("<h1>Dashboard nenalezen — umístěte frontend/index.html</h1>")
+    # Try local dev path and Docker path
+    paths = [
+        Path(__file__).parent.parent / "frontend" / "index.html",
+        Path(__file__).parent / "frontend" / "index.html",
+        Path("/app/frontend/index.html")
+    ]
+    for p in paths:
+        if p.exists():
+            return HTMLResponse(content=p.read_text(encoding="utf-8"))
+    return HTMLResponse(f"<h1>Dashboard nenalezen</h1><p>Hledáno v: {[str(x) for x in paths]}</p>")
 
 
 @app.post("/audits", response_model=AuditResponse, status_code=201)
