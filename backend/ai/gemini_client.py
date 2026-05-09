@@ -77,11 +77,16 @@ async def gemini_generate(prompt: str, temperature: float = 0.3) -> str:
                 print(f"OpenRouter Error: {e}, trying fallback...")
 
     # Priority 2: Direct Gemini
-    if _model:
+    if settings.gemini_api_key:
+        # Re-initialize or use cached model with the current setting
+        model_name = settings.gemini_model
+        print(f"DEBUG: Spouštím AI audit s modelem: {model_name}")
+        model = genai.GenerativeModel(model_name)
+        
         for attempt in range(3):
             try:
                 response = await asyncio.to_thread(
-                    _model.generate_content,
+                    model.generate_content,
                     prompt,
                     generation_config=genai.GenerationConfig(
                         temperature=temperature,
@@ -90,6 +95,7 @@ async def gemini_generate(prompt: str, temperature: float = 0.3) -> str:
                 )
                 return response.text
             except Exception as e:
+                print(f"Gemini Error (Attempt {attempt+1}): {e}")
                 if attempt == 2: raise e
                 await asyncio.sleep(2 ** attempt)
 
