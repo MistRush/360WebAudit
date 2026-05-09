@@ -26,7 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN playwright install chromium
 
 # Copy application
-COPY backend/ ./
+COPY backend/ /app/
+COPY frontend/ /app/frontend/
 
 # Create reports directory
 RUN mkdir -p /app/reports
@@ -38,4 +39,5 @@ ENV REPORTS_DIR=/app/reports
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form of CMD to allow environment variable expansion ($PORT)
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
