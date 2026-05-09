@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  # ── Backend API ─────────────────────────────────────────
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./webauditor.db
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    volumes:
+      - ./reports:/app/reports
+      - ./webauditor.db:/app/webauditor.db
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge

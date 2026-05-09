@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Web Auditor — Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+        .log-entry { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
+            <div>
+                <h1 class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                    AI Web Auditor 2026
+                </h1>
+                <p class="text-slate-400 mt-2">Analyzujte weby, odhalte chyby, získejte zakázky.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="glass px-4 py-2 rounded-full text-sm font-medium border-indigo-500/30 text-indigo-300">
+                    System Online
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Input Section -->
+        <section class="glass rounded-3xl p-8 mb-8 glow border-indigo-500/20">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="text-indigo-400">🚀</span> Nový Audit
+            </h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="url-input" placeholder="https://www.priklad.cz" 
+                       class="flex-1 bg-slate-900/50 border border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg">
+                <button id="start-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
+                    Spustit Analýzu
+                </button>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Live Progress -->
+            <div class="lg:col-span-1 flex flex-col gap-8">
+                <div class="glass rounded-3xl p-6 h-[500px] flex flex-col">
+                    <h3 class="text-lg font-bold mb-4 flex items-center justify-between">
+                        <span>📡 Live Log</span>
+                        <span id="status-badge" class="text-[10px] uppercase px-2 py-1 bg-slate-700 rounded-full text-slate-400">Neaktivní</span>
+                    </h3>
+                    <div id="logs" class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                        <div class="text-slate-500 italic text-sm">Zadejte URL a spusťte audit...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Audits -->
+            <div class="lg:col-span-2">
+                <div class="glass rounded-3xl p-6 min-h-[500px]">
+                    <h3 class="text-lg font-bold mb-6 flex items-center justify-between">
+                        <span>📊 Historie Auditů</span>
+                        <button onclick="loadHistory()" class="text-sm text-indigo-400 hover:text-indigo-300">Aktualizovat</button>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-slate-400 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="pb-4">Web</th>
+                                    <th class="pb-4">Skóre</th>
+                                    <th class="pb-4">Stav</th>
+                                    <th class="pb-4 text-right">Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-body" class="text-sm divide-y divide-slate-800">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripting -->
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const urlInput = document.getElementById('url-input');
+        const logsContainer = document.getElementById('logs');
+        const statusBadge = document.getElementById('status-badge');
+        const historyBody = document.getElementById('history-body');
+
+        function addLog(msg, level = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${level === 'error' ? 'text-red-400' : level === 'success' ? 'text-green-400' : 'text-slate-300'}`;
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="text-slate-500">[${time}]</span> ${msg}`;
+            logsContainer.appendChild(entry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/audits');
+                const data = await res.json();
+                historyBody.innerHTML = data.map(audit => `
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                        <td class="py-4 font-medium">${audit.url}</td>
+                        <td class="py-4">
+                            <span class="font-bold ${audit.score_total > 80 ? 'text-green-400' : audit.score_total > 50 ? 'text-amber-400' : 'text-red-400'}">
+                                ${audit.score_total || '-'}
+                            </span>
+                        </td>
+                        <td class="py-4">
+                            <span class="px-2 py-1 rounded-full text-[10px] bg-slate-800 border border-slate-700">
+                                ${audit.status}
+                            </span>
+                        </td>
+                        <td class="py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                ${audit.report_available ? 
+                                    `<a href="/audits/${audit.id}/report" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                                        <span>Report</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>` : 
+                                    '<span class="text-slate-600 italic text-xs">Zpracovávám...</span>'}
+                                
+                                <button onclick="deleteAudit(${audit.id})" class="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all" title="Smazat audit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load history", err);
+            }
+        }
+
+        async function deleteAudit(id) {
+            if (!confirm('Opravdu chcete tento audit smazat?')) return;
+            try {
+                const res = await fetch(`/audits/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadHistory();
+                } else {
+                    alert('Chyba při mazání auditu.');
+                }
+            } catch (err) {
+                console.error("Failed to delete audit", err);
+            }
+        }
+
+        startBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) return alert('Zadejte prosím URL');
+
+            startBtn.disabled = true;
+            startBtn.innerHTML = 'Pracuji...';
+            logsContainer.innerHTML = '';
+            statusBadge.innerText = 'Běží';
+            statusBadge.className = 'text-[10px] uppercase px-2 py-1 bg-indigo-500/20 rounded-full text-indigo-400 animate-pulse';
+
+            try {
+                const res = await fetch('/audits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const audit = await res.json();
+                
+                // Start SSE
+                const eventSource = new EventSource(`/audits/${audit.id}/stream`);
+                
+                eventSource.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    addLog(data.message, data.level);
+                };
+
+                eventSource.addEventListener('done', (event) => {
+                    const data = JSON.parse(event.data);
+                    addLog(`Audit dokončen! Skóre: ${data.score}`, 'success');
+                    statusBadge.innerText = 'Hotovo';
+                    statusBadge.className = 'text-[10px] uppercase px-2 py-1 bg-green-500/20 rounded-full text-green-400';
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = 'Spustit Analýzu';
+                    eventSource.close();
+                    loadHistory();
+                });
+
+                eventSource.onerror = () => {
+                    addLog('Spojení přerušeno nebo dokončeno.', 'info');
+                    eventSource.close();
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = 'Spustit Analýzu';
+                    loadHistory();
+                };
+
+            } catch (err) {
+                addLog(`Chyba: ${err.message}`, 'error');
+                startBtn.disabled = false;
+                startBtn.innerHTML = 'Spustit Analýzu';
+            }
+        });
+
+        loadHistory();
+    </script>
+</body>
+</html>
