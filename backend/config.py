@@ -10,7 +10,7 @@ from pathlib import Path
 class Settings(BaseSettings):
     # ── AI ────────────────────────────────────────────────
     gemini_api_key: str = Field("", env="GEMINI_API_KEY")
-    gemini_model: str = Field("gemini-3.1-flash-lite", env="GEMINI_MODEL")
+    gemini_model: str = Field("gemini-1.5-flash", env="GEMINI_MODEL")
     
     openrouter_api_key: str = Field("", env="OPENROUTER_API_KEY")
     openrouter_model: str = Field("google/gemini-flash-1.5", env="OPENROUTER_MODEL")
